@@ -1,0 +1,50 @@
+.info{
+	color: #68BE29;
+	font-family: Verdana, Geneva, sans-serif;
+	font-variant:small-caps;
+	font-weight:bold;
+}
+.navigation{
+	float:left;
+	background-color: #68BE29;
+	padding: 10px;
+	color: black;
+	margin-top:auto;
+	font-family: sans-serif;
+}
+	/*color: #68BE29;
+	margin-left: 0px;
+	float: left;
+	font-family::Verdana, Geneva, sans-serif;
+	color: black;
+	list-style-type:none;
+}
+.navigation li{
+	float:left;
+	color:black;
+	padding: 3px;
+}
+.navigation li:hover{
+	color: black;
+}*/
+.img{
+	width: 5%;
+}
+.img2{
+	width: 90%;	
+	float: left;
+}
+.img3{
+	width: 10vw;
+	float: left;
+}
+
+tr{
+	width: 100vw;
+}
+h1{
+	float: left;
+}
+div{
+	float: left;
+}
