@@ -1,0 +1,79 @@
+﻿var ylRichImageField = (function() {
+
+    return {
+
+        fromComputer: function(id) {
+            RTE.Cursor.get_range().moveToEndOfNode($get(id));
+            RTE.Cursor.update();
+            RTE.RichTextEditor.insertHtmlFromDialog('RteUploadDialog.aspx', 'UploadImage', false);
+            return false;
+        },
+
+        fromAddress: function(id) {
+            RTE.Cursor.get_range().moveToEndOfNode($get(id));
+            RTE.Cursor.update();
+            RTE.RichTextEditor.insertImage(false);
+            return false;
+        },
+
+        fromSharePoint: function(id) {
+            RTE.Cursor.get_range().moveToEndOfNode($get(id));
+            RTE.Cursor.update();
+            RTE.PublishingRichTextEditor.insertOrEditImage();
+            return false;
+        }
+    };
+})();
+
+jQuery(document).ready(function () {
+    jQuery('span[id$=RichImageField]').each(function (index, item) {
+        var $item = jQuery(item);
+        var $imageEmptyPanel = $item.find('span[id$=RichImageField_EmptyPanel]');
+        var $imageAssetSelectedPanel = $item.find('span[id$=RichImageField_AssetSelectedPanel]');
+        var $imageFieldDisplay = $imageAssetSelectedPanel.find('span[id$=RichImageField_ImageFieldDisplay]');
+
+        $imageEmptyPanel.focusin(function () {
+            /* $('#s4-ribbonrow').css('background-color', 'black'); */
+            $imageAssetSelectedPanel.find('br').remove();
+            return true;
+        });
+
+        $imageAssetSelectedPanel.focusin(function () {
+            /* $('#s4-ribbonrow').css('background-color', 'gray'); */
+            $imageAssetSelectedPanel.find('br').remove();
+            return true;
+        });
+
+        $imageEmptyPanel.focusout(function () {
+            /* $('#s4-ribbonrow').css('background-color', 'pink'); */
+            $imageAssetSelectedPanel.find('br').remove();
+            return true;
+        });
+
+        $imageAssetSelectedPanel.focusout(function () {
+            /* $('#s4-ribbonrow').css('background-color', 'blue'); */
+            $imageAssetSelectedPanel.find('br').remove();
+            return true;
+        });
+
+        var displayHtml = '<div class="ms-selectorlink" style="margin: 0pt auto; width: 200px;">';
+        displayHtml += '  <div style="float: left"><span class="ms-selectorlink">Insert picture from:</span></div>';
+        displayHtml += '  <div style="float: left">';
+        displayHtml += '    <a class="ms-toolbar ms-selectorlink" style="cursor: pointer; padding-left: 2px" onclick="ylRichImageField.fromComputer(\'' + $imageFieldDisplay.attr('id') + '\');" href="#">Computer</a><br />';
+        displayHtml += '    <a class="ms-toolbar ms-selectorlink" style="cursor: pointer; padding-left: 2px" onclick="ylRichImageField.fromAddress(\'' + $imageFieldDisplay.attr('id') + '\');" href="#">Address</a><br />';
+        displayHtml += '    <a class="ms-toolbar ms-selectorlink" style="cursor: pointer; padding-left: 2px" onclick="ylRichImageField.fromSharePoint(\'' + $imageFieldDisplay.attr('id') + '\');" href="#">SharePoint</a><br />';
+        displayHtml += '  </div>';
+        displayHtml += '  <div style="clear: both"></div>';
+        displayHtml += '</div>';
+
+        $imageEmptyPanel.html(displayHtml);
+
+        var $imageField = $imageFieldDisplay.find('img');
+
+        if (!$imageField.attr('src')) {
+            $imageFieldDisplay.html('');
+        }
+    });
+});
+
+//var CONST_ImageAssetPickerDialogName="AssetPortalBrowser.aspx";

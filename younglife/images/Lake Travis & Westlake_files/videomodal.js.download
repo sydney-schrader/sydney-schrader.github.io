@@ -1,0 +1,140 @@
+﻿var selectedModal = null;
+var modalSelector = "";
+
+function SetupModal(id) {
+    setTimeout(function () {
+        console.log("setting up modal " + id);
+
+        console.log(jQuery("#" + id));
+
+        jQuery("#" + id).on('mouseover', function () {
+            selectedModal = jQuery("#" + id);
+            modalSelector = "#" + id;
+        });
+
+        jQuery("#" + id).on('mouseleave', function () {
+            selectedModal = null;
+            modalSelector = "";
+        });
+
+        jQuery("#" + id + " video").on('click', function () {
+            selectedModal = jQuery("#" + id);
+            modalSelector = "#" + id;
+
+            VideoModal({ selectedModal: selectedModal, modalSelector: modalSelector });
+        });
+    }, 400);
+}
+
+function CloseVideoModal(id, caller) {
+    jQuery(id).removeAttr('style');
+    jQuery(caller).removeAttr('style');
+    jQuery(id + "_Overlay").removeAttr('style');
+    jQuery(id + " .VideoWrapperMain").removeAttr('style');
+    jQuery(id + " .VideoWrapperMain iframe").attr('style', 'height: 400px; width: 100%;');
+    jQuery(id + " .VideoWrapperMain video").removeAttr('controls');
+    jQuery(id + " .CloseButton").hide();
+    jQuery(id + " .HoverButton").removeAttr('style');
+
+    // optional video actions //
+    var video = jQuery(id + " .VideoWrapperMain video")[0];
+    if (video != null) {
+        video.pause();
+    }
+}
+
+// blur event is called when the window loses focus //
+window.addEventListener("blur", function () {
+    VideoModal(null);
+});
+window.addEventListener("click", function () {
+    console.log("global click");
+});
+
+function VideoModal(op) {
+    var l_selectedModal;
+    var l_modalSelector;
+
+    if (op != null) {
+        l_selectedModal = op.selectedModal;
+        l_modalSelector = op.modalSelector;
+    } else {
+        l_selectedModal = selectedModal;
+        l_modalSelector = modalSelector;
+    }
+
+    if (l_selectedModal != null) {
+        var top = jQuery(l_selectedModal).offset().top - jQuery(window).scrollTop();
+        var left = jQuery(l_selectedModal).offset().left;
+        var width = jQuery(l_selectedModal).width();
+        var height = jQuery(l_selectedModal).height();
+
+        jQuery(l_modalSelector + " .HoverButton").hide();
+
+        jQuery(l_selectedModal).css({
+            position: "fixed",
+            background: "#aeaeae",
+            display: "block",
+            width: width + "px",
+            height: height + "px",
+            "box-shadow": "0px 0px rgba(0, 0, 0, #000)",
+            top: top,
+            left: left
+        });
+
+        jQuery(l_modalSelector + "_Overlay").css({
+            position: "fixed",
+            height: "100vh",
+            width: "100%",
+            top: "0px",
+            left: "0px",
+            "z-index": "1000",
+            background: "rgba(0, 0, 0, 0.5)"
+        });
+
+        jQuery(l_modalSelector + "_Overlay").on('click', function () {
+            CloseVideoModal(l_modalSelector, null);
+        });
+
+        jQuery(l_modalSelector + " .VideoWrapperMain").css({
+            "z-index": "2000",
+            "position": "absolute",
+            "width": "100%",
+            "height": "100%"
+        });
+
+        jQuery(l_modalSelector + " .VideoWrapperMain iframe").css({
+            "height": "calc(100% - 50px)"
+        });
+
+        jQuery(l_modalSelector + " .VideoWrapperMain video").css({
+            "height": "calc(100% - 50px)"
+        });
+        jQuery(l_modalSelector + " .VideoWrapperMain video").attr('controls', 'true');
+        var video = jQuery(l_modalSelector + " .VideoWrapperMain video")[0];
+        if (video != null) {
+            video.play();
+        }
+
+        setTimeout(function () {
+            jQuery(l_selectedModal).css({
+                transition: "all 400ms ease"
+            });
+        }, 50);
+
+        setTimeout(function () {
+
+            jQuery(l_selectedModal).css({
+                left: "12.5%",
+                top: "12.5%",
+                "z-index": "10000",
+                width: "75%",
+                height: "75%",
+                "box-shadow": "0px 1px 4px 1px #000"
+            });
+
+            jQuery(l_modalSelector + " .CloseButton").show();
+        }, 75);
+
+    }
+}

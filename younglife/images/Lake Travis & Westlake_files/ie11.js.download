@@ -1,0 +1,21 @@
+﻿// fix for IE 11 //
+
+// IE 11 will throw an undefined error for the console
+// object if the F12 inspector isn't open
+// so any console output will break
+// Javascript functionality on IE 11.
+
+// toggle this for console output, but will break
+// IE 8 through 11.
+
+var debugging = false;
+
+// Overrides the default console object //
+
+if (!debugging) {
+    var console = {
+        log: function (value) {
+            // do nothing //
+        }
+    };
+}

@@ -1,0 +1,505 @@
+﻿// YL is a global variable for storing young life javascript data //
+
+var customObjectWatch = false,
+    yl = {
+
+        _functions: {
+            simpleResize: [],
+            resize: [],
+            simpleOnLoad: [],
+            onLoad: []
+        },
+        _listeners: {
+            screenSize: [],
+            resize: [],
+            scroll: [],
+            broadcast: {}
+        },
+        _types: {},
+        _scripts: {},
+        _responders: {
+            done: {},
+            type: {}
+        },
+        controllers: {},
+        _elementControllerPrototypes: [],
+
+        /*
+        VARIABLES
+
+        global variables that hold values for
+        web parts, scripts, and other important
+        things.
+
+        */
+
+        global: {
+            functions: {},
+            variables: {
+                mobileBreakpoint: 920,
+                sharepointLoaded: false,
+                ie: {
+                    is: false,
+                    version: 0
+                },
+                mobile: {
+                    is: false,
+                    browser: "uninitialized"
+                }
+            }
+        },
+
+        /*
+        FUNCTIONS
+
+        All methods that can be called on yl, some of
+        which are called or bound to events automatically.
+        */
+        onPageLoad: function (newFunc, ctx) {
+            if (this.global.variables.sharepointLoaded) {
+                if (ctx) {
+                    ctx[newFunc]();
+                } else {
+                    newFunc();
+                }
+            } else {
+                if (ctx) {
+                    this._functions.onLoad.push({
+                        scope: ctx,
+                        functionName: newFunc
+                    });
+                } else {
+                    this._functions.simpleOnLoad.push(newFunc);
+                }
+            }
+        },
+        onWindowResize: function (newFunc, ctx) {
+            if (ctx) {
+                this._functions.resize.push({
+                    scope: ctx,
+                    functionName: newFunc
+                });
+            } else {
+                this._functions.simpleResize.push(newFunc);
+            }
+        },
+        onWindowResizeWithin: function (newListener) {
+            this._listeners.screenSize.push(newListener);
+        },
+        onWindowScrollWithin: function (newListener) {
+            this._listeners.scroll.push(newListener);
+        },
+        onMillisecond: function (newFunc, milliseconds, ctx) {
+            var now = new Date();
+
+            setTimeout(function () {
+                setInterval(function () {
+                    if (isset(ctx)) {
+                        ctx[newFunc]();
+                    } else {
+                        newFunc();
+                    }
+                }, milliseconds);
+
+                if (isset(ctx)) {
+                    ctx[newFunc]();
+                } else {
+                    newFunc();
+                }
+            }, (milliseconds - now.getMilliseconds()));
+        },
+        requestAnimationFrame: function (callee) {
+            // polyfill for IE, as it does not support
+            // binding events to animation frame starts
+            if (this.global.variables.ie.is && this.global.variables.ie.version < 10) {
+                callee();
+            } else {
+                requestAnimationFrame(callee);
+            }
+        },
+        // Check browser for browser support methods; called automatically //
+        checkBrowser: function () {
+            var ua = window.navigator.userAgent;
+            var msie = ua.indexOf("MSIE ");
+
+            if (msie > 0 || !!navigator.userAgent.match(/Trident.*rv\:11\./)) {
+                var version = parseInt(ua.substring(msie + 5, ua.indexOf(".", msie)));
+
+                this.global.variables.ie.is = true;
+                this.global.variables.ie.version = version;
+            } else {
+                // not IE
+                // probably don't need to do anything
+            }
+        },
+
+        // DOM Creation //
+
+        createElement: function (data) {
+            if (!isset(data.type)) data.type = "div";
+
+            var newElement = document.createElement(data.type);
+
+            // html //
+            if (isset(data.html)) newElement.innerHTML = data.html;
+
+            // children //
+            if (typeof data.children !== 'undefined') {
+                for (var x = 0; x < data.children.length; x++) {
+                    newElement.appendChild(data.children[x]);
+                }
+            }
+
+            // parent //
+            if (isset(data.parent)) data.parent.appendChild(newElement);
+
+            // attributes //
+            if (isset(data.attributes)) {
+                for (var key in data.attributes) {
+                    var value = data.attributes[key];
+
+                    newElement.setAttribute(key, value);
+                }
+            }
+
+            return newElement;
+        },
+
+        // Controller Registry //
+
+        registerController: function (name, controllerAction) {
+            var newController = {
+                _name: name,
+                _action: controllerAction
+            };
+
+            if (typeof this.controllers[name] === 'undefined') {
+                this.controllers[name] = newController;
+                newController._action(newController);
+            }
+        },
+
+        registerElementController: function (name, parent, config, controllerAction, extraConfig) {
+            var prototype = {
+                name: name,
+                parent: parent,
+                config: config,
+                controllerAction: controllerAction,
+                extraConfig: typeof extraConfig !== 'undefined' ? extraConfig : {}
+            };
+
+            this._elementControllerPrototypes.push(prototype);
+        },
+
+        // Element Controller Construction //
+
+        buildElementControllers: function () {
+            for (var x = 0; x < this._elementControllerPrototypes.length; x++) {
+                var prototype = this._elementControllerPrototypes[x],
+                extraConfig = prototype.extraConfig,
+                parents = jQuery(prototype.parent),
+                config = prototype.config;
+                var controller = {
+                    _name: prototype.name,
+                    _config: config,
+                    list: []
+                };
+
+                for (var p = 0; p < parents.length; p++) {
+                    var parent = parents[p];
+                    var instance = {
+                        _action: prototype.controllerAction,
+                        elements: {
+                            parent: jQuery(parent)
+                        }
+                    };
+                    var _target = instance;
+
+                    if (isset(extraConfig.elementsObjectName)) {
+                        var _newName = extraConfig.elementsObjectName;
+
+                        if (!isset(instance[_newName])) {
+                            instance[_newName] = {};
+                        }
+
+                        _target = instance[_newName];
+                    }
+
+                    for (var name in prototype.config) {
+                        var selector = prototype.config[name],
+                        element = jQuery(selector, parent);
+
+                        _target[name] = element;
+                    }
+
+                    instance._action(instance);
+                    controller.list.push(instance);
+
+                    if (!(typeof prototype.extraConfig.useReadyFunction !== 'undefined'
+                    && !prototype.extraConfig.useReadyFunction
+                    && typeof instance.ready !== 'undefined')
+                    && typeof instance.ready === 'function')
+                        instance.ready();
+                }
+
+                this.controllers[prototype.name] = controller;
+            }
+        },
+
+        // Async Script Registry //
+
+        registerScript: function (scriptName, scriptUrl) {
+            if (typeof this._scripts[scriptName] === 'undefined') {
+                var newScript = document.createElement('script');
+                newScript.src = scriptUrl;
+                newScript.setAttribute("async", "");
+                newScript.setAttribute("defer", "");
+
+                document.head.appendChild(newScript);
+
+                this._scripts[scriptName] = {
+                    name: scriptName,
+                    url: scriptUrl,
+                    script: newScript
+                };
+            }
+        },
+
+        registerType: function (typeName, element) {
+            if (!isset(yl._types[typeName])) {
+                yl._types[typeName] = [];
+            }
+
+            yl._types[typeName].push(element);
+        },
+        getType: function (typeName) {
+            if (!isset(yl._types[typeName])) {
+                return false;
+            } else {
+                return yl._types[typeName];
+            }
+        },
+
+        broadcast: function (name, data) {
+            var listeners = yl._listeners.broadcast[name];
+            if (typeof listeners === "undefined") return;
+
+            for (var x = 0; x < listeners.length; x++) {
+                var curr = listeners[x];
+
+                curr(data);
+            }
+        },
+
+        on: function (name, callback) {
+            var broadcastListener = yl._listeners.broadcast[name];
+
+            typeof broadcastListener === 'undefined' ? broadcastListener = [] : "";
+
+            broadcastListener.push(callback);
+            yl._listeners.broadcast[name] = broadcastListener;
+        },
+
+        dequeneEvent: function (func, data) {
+            yl.requestAnimationFrame(function () {
+                func(data);
+            });
+        },
+        _resize: function () {
+            var eventData = this._getEventData();
+
+            this._notifyListeners(eventData);
+        },
+        _onLoad: function () {
+            var eventData = this._getEventData();
+            // Make Sure First Load has Fired //
+            if (isset(yl._responders.type.load) && isset(yl._responders.done.load) && !yl._responders.done.load) {
+                yl._responders.type.load();
+                yl._responders.done.load = true;
+            }
+
+            // Build Element Controllers //
+            yl.buildElementControllers();
+
+            // Notify Loaders //
+            for (var x = 0; x < this._functions.simpleOnLoad.length; x++) {
+                var currFunc = this._functions.simpleOnLoad[x];
+                currFunc(eventData);
+            }
+
+            for (var x = 0; x < this._functions.onLoad.length; x++) {
+                var currAction = this._functions.onLoad[x];
+
+                currAction.scope[currAction.functionName](eventData);
+            }
+
+            // Notify Listeners //
+            this._notifyListeners(eventData);
+
+            // Clear Sharepoint //
+            setTimeout(function () {
+                FixRibbonAndWorkspaceDimensions && FixRibbonAndWorkspaceDimensions();
+            }, 2000);
+        },
+        _scroll: function () {
+            var eventData = this._getEventData();
+
+            this.dequeneEvent(this._notifyScrollListeners, eventData);
+        },
+
+        _getEventData: function () {
+            return {
+                height: jQuery(window).innerHeight(), // cannot use 'height' on IE9
+                width: jQuery(window).innerWidth(), // cannot use 'width' on IE9
+                scroll: jQuery("#s4-workspace").scrollTop()
+            };
+        },
+
+        _notifyListeners: function (eventData) {
+            yl._notifyResizeListeners(eventData);
+            yl._notifyScrollListeners(eventData);
+        },
+        _notifyResizeListeners: function (eventData) {
+            // General Resize Listeners
+            for (var x = 0; x < this._functions.simpleResize.length; x++) {
+                var currFunc = this._functions.simpleResize[x];
+                currFunc(eventData);
+            }
+
+            for (var x = 0; x < this._functions.resize.length; x++) {
+                var resizeListener = this._functions.resize[x];
+
+                resizeListener.scope[resizeListener.functionName](eventData);
+            }
+
+            // Screen Size-specific Listeners
+            this._notifyScreenSizeListeners(eventData);
+        },
+        _notifyScreenSizeListeners: function (eventData) {
+            for (var x = 0; x < yl._listeners.screenSize.length; x++) {
+                var currentListener = yl._listeners.screenSize[x];
+
+                var belowHeight = eventData.height <= currentListener.max.height || currentListener.max.height == 0,
+                    aboveHeight = eventData.height > currentListener.min.height || currentListener.min.height == 0,
+                    belowWidth = eventData.width <= currentListener.max.width || currentListener.max.width == 0,
+                    aboveWidth = eventData.width > currentListener.min.width || currentListener.min.width == 0;
+
+                if (belowHeight && aboveHeight && belowWidth && aboveWidth) {
+                    currentListener.actionOn(eventData, true);
+                } else {
+                    currentListener.actionOff(eventData, false);
+                }
+            }
+        },
+        _notifyScrollListeners: function (eventData) {
+            for (var x = 0; x < yl._listeners.scroll.length; x++) {
+                var currentListener = yl._listeners.scroll[x];
+
+                var below = eventData.scroll < currentListener.max || currentListener.max == 0,
+                    above = eventData.scroll > currentListener.min || currentListener.min == 0;
+
+                if (below && above) {
+                    currentListener.actionOn(eventData, true);
+                } else {
+                    currentListener.actionOff(eventData, false);
+                }
+            }
+        },
+        _findTypes: function () {
+            jQuery('*[yl-type]').each(function (c, e) {
+                var typeName = jQuery(e).attr("yl-type"),
+                    splitType = typeName.split(" ");
+
+                for (var x = 0; x < splitType.length; x++) {
+                    var current = splitType[x];
+
+                    if (current.trim() !== '') {
+                        yl.registerType(current, e);
+                    }
+                }
+
+            });
+        }
+    };
+
+// === BINDINGS === //
+jQuery(window).resize(function (e) {
+    yl._resize();
+});
+
+// SharePoint ready //
+// This will always be first //
+yl.onPageLoad(function (eventData) {
+    yl._findTypes();
+    yl._notifyListeners(yl._getEventData());
+    jQuery("#s4-workspace").scroll(function(e){
+        yl._scroll();
+    });
+
+    yl.global.variables.sharepointLoaded = true;
+});
+
+// Document ready //
+jQuery(document).ready(function(){
+    yl.checkBrowser();
+});
+
+// there is an implied _onLoad binding that has to be done in the master page //
+
+// Helpers
+
+function isset(obj){
+    return typeof obj !== 'undefined' || obj != null;
+}
+
+// custom object.watch (overrides all other object.watch implementations)
+if (!Object.prototype.watch || true) {
+    customObjectWatch = true;
+
+    Object.defineProperty(Object.prototype, "watch", {
+        enumerable: false
+		, configurable: true
+		, writable: false
+		, value: function (prop, handler, ctx, data) {
+		    var 
+			  oldval = this[prop]
+			, newval = oldval
+			, getter = function () {
+			    return newval;
+			}
+			, setter = function (val) {
+			    oldval = newval;
+
+			    if (isset(ctx)) {
+			        return newval = ctx[handler](this, prop, oldval, val, data);
+			    } else {
+			        return newval = handler.call(this, prop, oldval, val, data);
+			    }
+			}
+			;
+
+		    if (delete this[prop]) { // can't watch constants
+		        Object.defineProperty(this, prop, {
+		            get: getter
+					, set: setter
+					, enumerable: true
+					, configurable: true
+		        });
+		    }
+		}
+    });
+}
+
+// object.unwatch
+if (!Object.prototype.unwatch) {
+	Object.defineProperty(Object.prototype, "unwatch", {
+		  enumerable: false
+		, configurable: true
+		, writable: false
+		, value: function (prop) {
+			var val = this[prop];
+			delete this[prop]; // remove accessors
+			this[prop] = val;
+		}
+	});
+}

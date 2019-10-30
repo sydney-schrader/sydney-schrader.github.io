@@ -1,0 +1,41 @@
+.navbar{
+	background-image: url('images/skyline.png');
+	height:110px;
+	margin-left: -10px;
+	margin-right: -10px;
+	text-align: center;
+	font-family: fantasy;
+}
+.navcolor{
+	margin-left: 10px;
+	margin-right: 10px;
+	color:#7CCE1F;
+	font-size:30px;
+	background-color: white;
+}
+.logo{
+	margin-top: 60px;
+	float: left;
+	width: 70px;
+}
+.header{
+	font-variant:small-caps;
+	text-align: center;
+	font-family: fantasy;
+	font-size: 75px;
+	margin-top:-10px;
+}
+.history{
+	background-color:#7CCE1F;
+	font-family: Snell Roundhand, cursive;
+	color: white;
+	border:groove;
+	padding: 10px;
+	border-color:black;
+	margin-top: -50px;
+}
+.group{
+	width:450px;
+}
+.link{
+	color:white;

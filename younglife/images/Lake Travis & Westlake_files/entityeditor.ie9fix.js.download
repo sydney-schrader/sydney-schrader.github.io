@@ -1,0 +1,71 @@
+﻿function ConvertEntityToSpan(ctx, entity) {
+    ULSGjk: ;
+    if (matches[ctx] == null)
+        matches[ctx] = new Array();
+    var key = entity.getAttribute("Key");
+    var displayText = entity.getAttribute("DisplayText");
+    var isResolved = entity.getAttribute("IsResolved");
+    var description = entity.getAttribute("Description");
+    var style = 'ms-entity-unresolved';
+    if (isResolved == 'True')
+        style = 'ms-entity-resolved';
+    var spandata = "<span id='span" + STSHtmlEncode(key) + "' isContentType='true' tabindex='-1' class='" + style + "' ";
+    if (browseris.ie8standard)
+        spandata += "onmouseover='this.contentEditable=false;' onmouseout='this.contentEditable=true;' contentEditable='true' ";
+    else
+        spandata += "contentEditable='false' ";
+    spandata += "title='" + STSHtmlEncode(description) + "'>";
+    spandata += "<div style='display:none;' id='divEntityData' ";
+    spandata += "key='" + STSHtmlEncode(key) + "' displaytext='" + STSHtmlEncode(displayText) + "' isresolved='" + STSHtmlEncode(isResolved) + "' ";
+    spandata += "description='" + STSHtmlEncode(description) + "'>";
+    var multipleMatches = EntityEditor_SelectSingleNode(entity, "MultipleMatches");
+    matches[ctx][key] = multipleMatches;
+    var extraData = EntityEditor_SelectSingleNode(entity, "ExtraData");
+    if (extraData) {
+        var data;
+        if (extraData.firstChild)
+            data = extraData.firstChild.xml;
+        if (!data) data = extraData.innerXml || extraData.innerHTML;
+        if (!data && document.implementation && document.implementation.createDocument) {
+            var serializer = new XMLSerializer();
+            data = serializer.serializeToString(extraData.firstChild);
+            // **** CUSTOM FUNCTION ****            
+            data = fixDataInIE9(data);
+        }
+        if (!data) data = '';
+        spandata += "<div data='" + STSHtmlEncode(data) + "'></div>";
+    }
+    else {
+        spandata += "<div data=''></div>";
+    }
+    spandata += "</div>";
+    if (PreferContentEditableDiv(ctx)) {
+        if (browseris.safari) {
+            spandata += "<span id='content' tabindex='-1' contenteditable='false'  onmousedown='onMouseDownRw(event);' onContextMenu='onContextMenuSpnRw(event,ctx);' >";
+        }
+        else {
+            spandata += "<span id='content' tabindex='-1' contenteditable onmousedown='onMouseDownRw(event);' onContextMenu='onContextMenuSpnRw(event,ctx);' >";
+        }
+    }
+    else {
+        spandata += "<span id='content' tabindex='-1' contenteditable onmousedown='onMouseDownRw(event);' onContextMenu='onContextMenuSpnRw(event,ctx);' >";
+    }
+    if (browseris.ie8standard)
+        spandata += "\r";
+    if (displayText != '')
+        spandata += STSHtmlEncode(displayText);
+    else
+        spandata += STSHtmlEncode(key);
+    if (browseris.ie8standard)
+        spandata += "\r</span></span>\r";
+    else
+        spandata += "</span></span>";
+    return spandata;
+}
+// **** CUSTOM FUNCTION ****
+function fixDataInIE9(data) {
+    if (data.indexOf('<ArrayOfDictionaryEntry>') >= 0) {
+        data = data.replace('<ArrayOfDictionaryEntry>', '<ArrayOfDictionaryEntry xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema-instance\">');
+    }
+    return data;
+}
