@@ -39,3 +39,18 @@
 }
 .link{
 	color:white;
+}
+.contacttable{
+	border:dashed;	
+}
+.contact{
+	width: 200px;	
+}
+.contactfont{
+	font-family: Snell Roundhand, cursive;
+	margin-top:-10px;
+	font-size: 20px;
+}
+.contactfont2{
+	float:right;
+}
