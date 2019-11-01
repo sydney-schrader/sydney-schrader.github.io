@@ -4,11 +4,11 @@
 	margin-left: -10px;
 	margin-right: -10px;
 	text-align: center;
-	font-family:Verdana, Geneva, sans-serif;
+	font-family:Tahoma, Geneva, sans-serif;
 }
 .navcolor{
-	margin-left: 10px;
-	margin-right: 10px;
+	margin-left: 5px;
+	margin-right: 5px;
 	color:#7CCE1F;
 	font-size:30px;
 	background-color: white;
@@ -21,7 +21,7 @@
 .header{
 	font-variant:small-caps;
 	text-align: center;
-	font-family:Verdana, Geneva, sans-serif;
+	font-family:Tahoma, Geneva, sans-serif;
 	font-size: 55px;
 	margin-top:-10px;
 }
