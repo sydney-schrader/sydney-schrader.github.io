@@ -24,6 +24,7 @@
 	font-family:Tahoma, Geneva, sans-serif;
 	font-size: 55px;
 	margin-top:-10px;
+	font-weight: bold;
 }
 .history{
 	background-color:#7CCE1F;
@@ -54,3 +55,24 @@
 .contactfont2{
 	float:right;
 }
+.subheader{
+	font-variant:small-caps;
+	text-align: left;
+	font-family:Tahoma, Geneva, sans-serif;
+	font-size: 40px;
+	margin-top:-20px;
+	font-weight: bold;
+	color:#7CCE1F;
+}
+.aboutfont{
+	font-family:Verdana, Geneva, sans-serif;
+}
+.aboutheader{
+	background-color: #0C366A;
+	color: white;
+	font-family:Tahoma, Geneva, sans-serif;
+	padding: 20px;
+}
+.aboutimage{
+	align: top;
+	size: 10px;
