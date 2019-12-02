@@ -143,6 +143,6 @@ button{
 	font-size:13px;
 	font-family:Tahoma, Geneva, sans-serif;
 }
-.dropdown:hover .dropdownchild{
+.dropdown:hover {
 	display: block;
 }
