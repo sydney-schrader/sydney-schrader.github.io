@@ -127,22 +127,3 @@ th#small, td#small, tr#small{
 	border-collapse: collapse;
 	border-spacing: 0px;
 }
-button{
-	background-color: transparent;
-	border: none;
-	text-decoration: underline;
-}
-.dropdown{
-	position: relative;
-	display: inline-table;
-}
-.dropdownchild{
-	display: none;
-	background-color: white;
-	min-width:120px;
-	font-size:13px;
-	font-family:Tahoma, Geneva, sans-serif;
-}
-.dropdown:hover {
-	display: block;
-}
