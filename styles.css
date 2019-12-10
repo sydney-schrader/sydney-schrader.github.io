@@ -127,3 +127,23 @@ th#small, td#small, tr#small{
 	border-collapse: collapse;
 	border-spacing: 0px;
 }
+.schoolssubheader{
+	font-variant:small-caps;
+	text-align: center;
+	font-family:Tahoma, Geneva, sans-serif;
+	font-size: 40px;
+	margin-top: -20px;
+	margin-bottom: -30px;
+	font-weight: bold;
+	color:#7CCE1F;
+}
+.schools{
+	font-variant:small-caps;
+	text-align: center;
+	font-family:Tahoma, Geneva, sans-serif;
+	font-size: 40px;
+	font-weight: bold;
+}
+.schoolsimages{
+	width: 40%;
+}
